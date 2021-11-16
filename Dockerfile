@@ -45,8 +45,8 @@ RUN apt-get update \
 # Set working directory to root
 WORKDIR /root
 
-# Clone and build the project (TODO: Fix version with --branch v0.5.x)
-RUN git clone https://github.com/metacall/core \
+# Clone and build the project
+RUN git clone --branch v0.5.9 https://github.com/metacall/core \
 	&& mkdir core/build && cd core/build \
 	&& cmake \
 		-DOPTION_BUILD_LOADERS_C=On \

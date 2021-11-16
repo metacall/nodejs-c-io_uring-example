@@ -4,9 +4,9 @@
 
 This interface is offered through [`liburing`](https://github.com/axboe/liburing), which provides a C API for accessing it. We could write a NodeJS extension by using [`N-API`](https://nodejs.org/api/n-api.html), or use [`ffi`](https://www.npmjs.com/package/ffi) in order to call to the library.
 
-This is costly because either we have to write C/C++ or JavaScript boilerplate. So instead of doing that, we will be using [MetaCall](https://github.com/metacall/core) in order to achieve this.
+Developing those wrappers is costly because either we have to write C/C++ or JavaScript boilerplate. So instead of doing that, we will be using [MetaCall](https://github.com/metacall/core) in order to achieve this.
 
-MetaCall allows to transparently call to C functions, we can implement anything in C and without need to compile it manually (it will be JITed at load time). So basically we can load it directly into NodeJS. For example:
+MetaCall allows to transparently call to C functions, we can implement anything in C and without need to compile it manually (it will be JITed at load time). So basically we can load C code directly into NodeJS. For example:
 
 ```c
 int sum(int a, int b) {
