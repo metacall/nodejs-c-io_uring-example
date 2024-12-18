@@ -1,0 +1,22 @@
+name: CI Linux Build and Test
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v3
+
+    - name: Test Docker Build
+      run: |
+        docker build -t metacall/nodejs-c-liburing-example .
+        docker run --rm -p 8000:8000 -it metacall/nodejs-c-liburing-example
