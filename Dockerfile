@@ -17,7 +17,7 @@
 #	limitations under the License.
 #
 
-FROM debian:bookworm-slim
+FROM debian:trixie-slim
 
 # Image descriptor
 LABEL copyright.name="Vicente Eduardo Ferrer Garcia" \
@@ -30,23 +30,16 @@ LABEL copyright.name="Vicente Eduardo Ferrer Garcia" \
 # Install dependencies
 RUN apt-get update \
 	&& apt-get install -y --no-install-recommends \
-		build-essential \
-		cmake \
-		libclang-12-dev \
-		libffi-dev \
-		liburing-dev \
 		ca-certificates \
 		git \
-		nodejs \
-		npm \
-		unzip \
-	&& npm install -g npm@latest
+		liburing-dev
 
 # Set working directory to root
 WORKDIR /root
 
 # Clone and build the project
-RUN git clone --branch v0.5.9 https://github.com/metacall/core \
+RUN git clone --branch v0.8.7 https://github.com/metacall/core \
+	&& ./core/tools/metacall-environment.sh release base nodejs c \
 	&& mkdir core/build && cd core/build \
 	&& cmake \
 		-DOPTION_BUILD_LOADERS_C=On \
