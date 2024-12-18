@@ -19,4 +19,4 @@ jobs:
     - name: Test Docker Build
       run: |
         docker build -t metacall/nodejs-c-liburing-example .
-        docker run --rm -p 8000:8000 -it metacall/nodejs-c-liburing-example
+        docker run --rm -p 8000:8000 metacall/nodejs-c-liburing-example
