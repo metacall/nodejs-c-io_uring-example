@@ -47,6 +47,9 @@ jobs:
         sudo cmake --build . --target install
         sudo ldconfig /usr/local/lib
         cd ../..
+        sudo rm -rf core
+        ls #--------------------------just_checking_if_we_are_in_the_correct_folder
+
 
     - name: Copy files to destination
       run: |
@@ -57,11 +60,20 @@ jobs:
         sudo cp scripts/uring.c /home/scripts/
         sudo cp scripts/script.ld /home/scripts/
       shell: bash
-    
 
-    - name: Run MetaCall Example
+    - name: checking if uring.c is not altered somehow
+      run: sudo cat /home/scripts/uring.c
+
+    - name: checking if script.ld is not altered somehow
+      run: sudo cat /home/scripts/script.ld
+
+    - name: Set path & Run MetaCall Example
       run: |
-        metacallcli /root/index.js
+        export LOADER_LIBRARY_PATH=/usr/local/lib
+        export LOADER_SCRIPT_PATH=/home/scripts
+        env | grep LOADER_LIBRARY_PATH #----------------------------------------just_checking_if_enviroment_path_is_set_correctly
+        env | grep LOADER_SCRIPT_PATH
+        sudo metacallcli /root/index.js
 
     - name: Wait for server to be ready
       run: |
