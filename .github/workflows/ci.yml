@@ -21,19 +21,10 @@ jobs:
 
         URL="http://localhost:8000"
         MAX_RETRIES=20
-        RETRY_INTERVAL=5
 
-        # Function to check if the service is up (returns HTTP 200)
-        check_service() {
-            # wget tries to fetch the URL quietly and returns only the status code
-            HTTP_CODE=$(wget --spider --server-response -q "$URL" 2>&1 | grep "HTTP/" | awk '{print $2}')
-            echo "$HTTP_CODE"
-        }
-
-        # Retry logic
         RETRIES=0
         while true; do
-            HTTP_CODE=$(check_service)
+            HTTP_CODE=$(wget --server-response -q "$URL" 2>&1 | grep "HTTP/" | awk '{print $2}')
 
             if [ "$HTTP_CODE" -eq 200 ]; then
                 echo "Service is ready (HTTP 200)."
@@ -46,7 +37,6 @@ jobs:
                 exit 1
             fi
 
-            echo "Service not ready (HTTP $HTTP_CODE). Retrying in $RETRY_INTERVAL seconds..."
             RETRIES=$((RETRIES + 1))
-            sleep "$RETRY_INTERVAL"
+            sleep 5
         done
