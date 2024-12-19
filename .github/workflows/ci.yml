@@ -16,12 +16,11 @@ jobs:
       uses: actions/checkout@v4
     - name: Test Docker Build
       run: |
-        set -xu
         docker build -t metacall/nodejs-c-liburing-example .
         docker run --rm -p 8000:8000 --name metacall_test -d metacall/nodejs-c-liburing-example
         RETRIES=0
         while true; do
-            wget --server-response -q "http://localhost:8000"
+            wget --server-response -q "http://localhost:8000" || true
             HTTP_CODE="$(wget --server-response -q "http://localhost:8000" 2>&1 | grep "HTTP/" | awk '{print $2}')"
             if [[ "$HTTP_CODE" -eq "200" ]]; then
                 echo "Service is ready (HTTP 200)."
