@@ -1,0 +1,52 @@
+
+name: CI Linux Build and Test
+
+on:
+  workflow_dispatch:
+  pull_request:
+  push:
+    branches:
+      - master
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v4
+    - name: Test Docker Build
+      run: |
+        docker build -t metacall/nodejs-c-liburing-example .
+        docker run --rm -p 8000:8000 --name metacall_test -d metacall/nodejs-c-liburing-example
+
+        URL="http://localhost:8000"
+        MAX_RETRIES=20
+        RETRY_INTERVAL=5
+
+        # Function to check if the service is up (returns HTTP 200)
+        check_service() {
+            # wget tries to fetch the URL quietly and returns only the status code
+            HTTP_CODE=$(wget --spider --server-response -q "$URL" 2>&1 | grep "HTTP/" | awk '{print $2}')
+            echo "$HTTP_CODE"
+        }
+
+        # Retry logic
+        RETRIES=0
+        while true; do
+            HTTP_CODE=$(check_service)
+
+            if [ "$HTTP_CODE" -eq 200 ]; then
+                echo "Service is ready (HTTP 200)."
+                break
+            fi
+
+            # Check if we've reached max retries
+            if [ "$RETRIES" -ge "$MAX_RETRIES" ]; then
+                echo "Max retries reached. Service not ready."
+                exit 1
+            fi
+
+            echo "Service not ready (HTTP $HTTP_CODE). Retrying in $RETRY_INTERVAL seconds..."
+            RETRIES=$((RETRIES + 1))
+            sleep "$RETRY_INTERVAL"
+        done
