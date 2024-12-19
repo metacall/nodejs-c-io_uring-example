@@ -4,9 +4,11 @@ on:
   push:
     branches:
       - master
+      - adding_CI
   pull_request:
     branches:
       - master
+      - adding_CI
 
 jobs:
   build-and-test:
@@ -15,6 +17,76 @@ jobs:
     steps:
     - name: Checkout Code
       uses: actions/checkout@v3
+
+    - name: Set up Dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y --no-install-recommends \
+          ca-certificates \
+          git \
+          liburing-dev \
+          cmake \
+          curl
+
+    - name: Clone and Build MetaCall
+      run: |
+        git clone --branch v0.8.7 https://github.com/metacall/core
+        cd core
+        ./tools/metacall-environment.sh release base nodejs c
+        sudo mkdir build && cd build
+        sudo cmake \
+          -DOPTION_BUILD_LOADERS_C=On \
+          -DOPTION_BUILD_LOADERS_NODE=On \
+          -DOPTION_BUILD_PORTS=On \
+          -DOPTION_BUILD_PORTS_NODE=On \
+          -DOPTION_BUILD_DETOURS=Off \
+          -DOPTION_BUILD_SCRIPTS=Off \
+          -DOPTION_BUILD_TESTS=Off \
+          -DOPTION_BUILD_EXAMPLES=Off \
+          ..
+        sudo cmake --build . --target install
+        sudo ldconfig /usr/local/lib
+        cd ../..
+
+    - name: Copy files to destination
+      run: |
+        sudo mkdir -p /root/public
+        sudo mkdir -p /home/scripts
+        sudo cp index.js /root/
+        sudo cp -r public/* /root/public/
+        sudo cp scripts/uring.c /home/scripts/
+        sudo cp scripts/script.ld /home/scripts/
+      shell: bash
+    
+
+    - name: Run MetaCall Example
+      run: |
+        metacallcli /root/index.js
+
+    - name: Wait for server to be ready
+      run: |
+        for i in {1..10}; do
+          if curl -s http://localhost:8000 > /dev/null; then
+            echo "Server is up!"
+            exit 0
+          fi
+          echo "Waiting for server..."
+          sleep 3
+        done
+        echo "Server did not start in time."
+        exit 1
+      shell: bash
+
+    - name: Test server response
+      run: |
+        RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8000)
+        if [ "$RESPONSE" -eq 200 ]; then
+          echo "Server responded with HTTP 200 OK."
+        else
+          echo "Server did not respond with HTTP 200. Response code: $RESPONSE"
+          exit 1
+        fi
+      shell: bash
 
     - name: Test Docker Build
       run: |
