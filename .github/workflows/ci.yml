@@ -21,7 +21,7 @@ jobs:
         docker run --rm -p 8000:8000 --name metacall_test -d metacall/nodejs-c-liburing-example
         RETRIES=0
         while true; do
-            HTTP_CODE=$(wget --server-response -q "http://localhost:8000" 2>&1 | grep "HTTP/" | awk '{print $2}')
+            HTTP_CODE="$(wget --server-response -q "http://localhost:8000" 2>&1 | grep "HTTP/" | awk '{print $2}')"
             if [[ "$HTTP_CODE" -eq "200" ]]; then
                 echo "Service is ready (HTTP 200)."
                 exit 0
