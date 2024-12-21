@@ -4,11 +4,9 @@ on:
   push:
     branches:
       - master
-      - adding_CI
   pull_request:
     branches:
       - master
-      - adding_CI
 
 jobs:
   build-and-test:
@@ -48,33 +46,14 @@ jobs:
         sudo ldconfig /usr/local/lib
         cd ../..
         sudo rm -rf core
-        ls #--------------------------just_checking_if_we_are_in_the_correct_folder
-
-
-    - name: Copy files to destination
-      run: |
-        sudo mkdir -p /root/public
-        sudo mkdir -p /home/scripts
-        sudo cp index.js /root/
-        sudo cp -r public/* /root/public/
-        sudo cp scripts/uring.c /home/scripts/
-        sudo cp scripts/script.ld /home/scripts/
-      shell: bash
-
-    - name: checking if uring.c is not altered somehow
-      run: sudo cat /home/scripts/uring.c
-
-    - name: checking if script.ld is not altered somehow
-      run: sudo cat /home/scripts/script.ld
-
+        
     - name: Set path & Run MetaCall Example
       run: |
-        export LOADER_LIBRARY_PATH=/usr/local/lib
-        export LOADER_SCRIPT_PATH=/home/scripts
-        env | grep LOADER_LIBRARY_PATH #----------------------------------------just_checking_if_enviroment_path_is_set_correctly
-        env | grep LOADER_SCRIPT_PATH
-        sudo metacallcli /root/index.js
-
+        export LOADER_LIBRARY_PATH="/usr/local/lib"
+        export LOADER_SCRIPT_PATH="/home/runner/work/nodejs-c-io_uring-example/nodejs-c-io_uring-example/scripts" # path of the scripts
+        nohup metacallcli index.js & # running the server in the background
+        echo $! > metacall_pid.txt  # Save the PID of the process to a file
+        
     - name: Wait for server to be ready
       run: |
         for i in {1..10}; do
@@ -97,6 +76,18 @@ jobs:
         else
           echo "Server did not respond with HTTP 200. Response code: $RESPONSE"
           exit 1
+        fi
+      shell: bash
+
+    - name: Kill MetaCall process (free port 8000)
+      run: |
+        if [ -f metacall_pid.txt ]; then
+          PID=$(cat metacall_pid.txt)
+          echo "Killing process with PID $PID"
+          kill $PID
+          rm metacall_pid.txt  # Remove the PID file after killing the process
+        else
+          echo "PID file not found. No process to kill."
         fi
       shell: bash
 
