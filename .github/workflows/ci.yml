@@ -29,26 +29,16 @@ jobs:
         git clone --branch v0.8.7 https://github.com/metacall/core
         cd core
         ./tools/metacall-environment.sh release base nodejs c
-        sudo mkdir build && cd build
-        sudo cmake \
-          -DOPTION_BUILD_LOADERS_C=On \
-          -DOPTION_BUILD_LOADERS_NODE=On \
-          -DOPTION_BUILD_PORTS=On \
-          -DOPTION_BUILD_PORTS_NODE=On \
-          -DOPTION_BUILD_DETOURS=Off \
-          -DOPTION_BUILD_SCRIPTS=Off \
-          -DOPTION_BUILD_TESTS=Off \
-          -DOPTION_BUILD_EXAMPLES=Off \
-          ..
-        sudo cmake --build . --target install
-        sudo ldconfig /usr/local/lib
+        mkdir build && cd build
+        ../tools/metacall-configure.sh release nodejs c ports install
+        ../tools/metacall-build.sh release nodejs c ports install
         cd ../..
-        sudo rm -rf core
-        
+        rm -rf core
+
     - name: Set path & Run MetaCall Example
       run: |
         export LOADER_LIBRARY_PATH="/usr/local/lib"
-        export LOADER_SCRIPT_PATH="/home/runner/work/nodejs-c-io_uring-example/nodejs-c-io_uring-example/scripts" # path of the scripts
+        export LOADER_SCRIPT_PATH="$(pwd)/scripts" # path of the scripts
         metacallcli index.js
         # nohup metacallcli index.js & # running the server in the background
         echo $! > metacall_pid.txt  # Save the PID of the process to a file
