@@ -39,6 +39,9 @@ jobs:
       run: |
         export LOADER_LIBRARY_PATH="/usr/local/lib"
         export LOADER_SCRIPT_PATH="$(pwd)/scripts" # path of the scripts
+        ldd /usr/local/lib/libnode_loader.so
+        whereis node
+        ldd /usr/bin/node
         metacallcli index.js
         # nohup metacallcli index.js & # running the server in the background
         echo $! > metacall_pid.txt  # Save the PID of the process to a file
