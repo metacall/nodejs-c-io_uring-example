@@ -99,3 +99,18 @@ jobs:
       run: |
         docker build -t metacall/nodejs-c-liburing-example .
         docker run --rm -p 8000:8000 metacall/nodejs-c-liburing-example
+
+# TODO: This works on my pc.. but it seems not to work in the CI, we should review it
+# RETRIES=0
+# while true; do
+#     HTTP_CODE="$(wget --server-response -q "http://localhost:8000" 2>&1 | grep "HTTP/" | awk '{print $2}')"
+#     if [[ "$HTTP_CODE" -eq "200" ]]; then
+#         echo "Service is ready (HTTP 200)."
+#         exit 0
+#     elif [[ "$RETRIES" -ge "20" ]]; then
+#         echo "Max retries reached. Service not ready."
+#         exit 1
+#     fi
+#     RETRIES=$((RETRIES + 1))
+#     sleep 5
+# done
