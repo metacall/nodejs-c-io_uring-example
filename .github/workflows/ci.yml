@@ -89,7 +89,9 @@ jobs:
         docker run --rm -p 8000:8000 --name metacall_test -d metacall/nodejs-c-liburing-example
 
     - name: Get docker logs
-      run: docker logs metacall_test
+      run: |
+        sleep 10
+        docker logs metacall_test
 
     - name: Wait for server to be ready
       run: |
