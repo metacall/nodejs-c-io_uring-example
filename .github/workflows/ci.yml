@@ -98,7 +98,7 @@ jobs:
     - name: Test Docker Build
       run: |
         docker build -t metacall/nodejs-c-liburing-example .
-        docker run --rm -p 8000:8000 metacall/nodejs-c-liburing-example
+        docker run --rm -p 8000:8000 --name metacall_test -d metacall/nodejs-c-liburing-example
 
 # TODO: This works on my pc.. but it seems not to work in the CI, we should review it
 # RETRIES=0
