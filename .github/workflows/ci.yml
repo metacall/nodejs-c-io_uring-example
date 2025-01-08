@@ -39,7 +39,6 @@ jobs:
       run: |
         export LOADER_LIBRARY_PATH="/usr/local/lib"
         export LOADER_SCRIPT_PATH="$(pwd)/scripts" # path of the scripts
-        node -e "console.log(require('util').parseArgs({ args: ['a'] }))"
         nohup metacallcli index.js & # running the server in the background
         echo $! > metacall_pid.txt  # Save the PID of the process to a file
         
