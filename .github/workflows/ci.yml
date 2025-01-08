@@ -1,20 +1,18 @@
-name: CI for nodejs-c-io_uring-example
+name: CI
 
 on:
-  push:
-    branches:
-      - master
   pull_request:
+  push:
     branches:
       - master
 
 jobs:
-  Linux_test:
+  linux:
     runs-on: ubuntu-latest
 
     steps:
     - name: Checkout Code
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
 
     - name: Set up Dependencies
       run: |
@@ -89,14 +87,13 @@ jobs:
         else
           echo "PID file not found. No process to kill."
         fi
-      shell: bash
 
-  Docker_test:
+  docker:
     runs-on: ubuntu-latest
 
     steps:
     - name: Checkout Code
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
 
     - name: Test Docker Build
       run: |
