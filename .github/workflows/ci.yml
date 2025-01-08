@@ -49,7 +49,8 @@ jobs:
       run: |
         export LOADER_LIBRARY_PATH="/usr/local/lib"
         export LOADER_SCRIPT_PATH="/home/runner/work/nodejs-c-io_uring-example/nodejs-c-io_uring-example/scripts" # path of the scripts
-        nohup metacallcli index.js & # running the server in the background
+        metacallcli index.js
+        # nohup metacallcli index.js & # running the server in the background
         echo $! > metacall_pid.txt  # Save the PID of the process to a file
         
     - name: Wait for server to be ready
@@ -100,7 +101,7 @@ jobs:
         docker build -t metacall/nodejs-c-liburing-example .
         docker run --rm -p 8000:8000 --name metacall_test -d metacall/nodejs-c-liburing-example
 
-# TODO: This works on my pc.. but it seems not to work in the CI, we should review it
+# TODO: This works on my pc.. but it seems not to work in the CI, we should review it and implement it
 # RETRIES=0
 # while true; do
 #     HTTP_CODE="$(wget --server-response -q "http://localhost:8000" 2>&1 | grep "HTTP/" | awk '{print $2}')"
