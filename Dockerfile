@@ -40,7 +40,7 @@ WORKDIR /root
 # Clone and build the project
 RUN git clone --branch v0.8.7 https://github.com/metacall/core \
 	&& mkdir core/build && cd core/build \
-	&& ../tools/metacall-environment.sh release base nodejs c \
+	&& ../tools/metacall-environment.sh release base nodejs c backtrace \
 	&& ../tools/metacall-configure.sh release nodejs c ports install \
 	&& ../tools/metacall-build.sh release nodejs c ports install \
 	&& cd ../.. \

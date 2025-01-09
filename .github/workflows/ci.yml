@@ -21,32 +21,7 @@ jobs:
         docker build -t metacall/nodejs-c-liburing-example .
         docker run -p 8000:8000 --name metacall_test -d metacall/nodejs-c-liburing-example
         docker ps
-        docker ps
-        docker ps
-        docker ps
-        docker ps
-        docker ps
-        docker ps
-        docker ps
-        sleep 1
-        docker ps
-        sleep 1
-        docker ps
-        sleep 1
-        docker ps
-        sleep 1
-        docker ps
-        sleep 1
-        docker ps
-        sleep 1
-        docker ps
-        sleep 1
-        docker ps
-        sleep 1
-        docker ps
-        sleep 1
-        docker ps
-        sleep 1
+        sleep 10
         docker ps
         docker logs metacall_test
         docker inspect metacall_test --format='{{.State.ExitCode}}'
