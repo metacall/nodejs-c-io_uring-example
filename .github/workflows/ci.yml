@@ -17,15 +17,11 @@ jobs:
 
     - name: Test Docker Build
       run: |
+        set -x
         docker build -t metacall/nodejs-c-liburing-example .
         docker run -p 8000:8000 --name metacall_test -d metacall/nodejs-c-liburing-example
-
-    - name: Wait for Readiness
-      run: |
+        docker ps
         until [ "`docker inspect -f {{.State.Health.Status}} metacall_test`" == "healthy" ]; do
             sleep 1
         done
-
-    - name: Test
-      run: |
         curl localhost:8000 || exit 1
