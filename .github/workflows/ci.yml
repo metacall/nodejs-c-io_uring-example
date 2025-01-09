@@ -1,15 +1,98 @@
-
-name: CI Linux Build and Test
+name: CI
 
 on:
-  workflow_dispatch:
-  pull_request:
   push:
     branches:
       - master
+      - Debug_CI
+  pull_request:
+    branches:
+      - master
+      - Debug_CI
 
 jobs:
-  test:
+  Linux_test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v3
+
+    - name: Set up Dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y --no-install-recommends \
+          ca-certificates \
+          git \
+          liburing-dev \
+          cmake \
+          curl
+    - name: Clone and Build MetaCall
+      run: |
+        git clone --branch v0.8.7 https://github.com/metacall/core
+        cd core
+        ./tools/metacall-environment.sh release base nodejs c
+        sudo mkdir build && cd build
+        sudo cmake \
+          -DOPTION_BUILD_LOADERS_C=On \
+          -DOPTION_BUILD_LOADERS_NODE=On \
+          -DOPTION_BUILD_PORTS=On \
+          -DOPTION_BUILD_PORTS_NODE=On \
+          -DOPTION_BUILD_DETOURS=Off \
+          -DOPTION_BUILD_SCRIPTS=Off \
+          -DOPTION_BUILD_TESTS=Off \
+          -DOPTION_BUILD_EXAMPLES=Off \
+          ..
+        sudo cmake --build . --target install
+        sudo ldconfig /usr/local/lib
+        cd ../..
+        sudo rm -rf core
+        
+    - name: Set path & Run MetaCall Example
+      run: |
+        export LOADER_LIBRARY_PATH="/usr/local/lib"
+        export LOADER_SCRIPT_PATH="/home/runner/work/nodejs-c-io_uring-example/nodejs-c-io_uring-example/scripts" # path of the scripts
+        nohup metacallcli index.js & # running the server in the background
+        echo $! > metacall_pid.txt  # Save the PID of the process to a file
+        
+    - name: Wait for server to be ready
+      run: |
+        for i in {1..10}; do
+          if curl -s http://localhost:8000 > /dev/null; then
+            echo "Server is up!"
+            exit 0
+          fi
+          echo "Waiting for server..."
+          sleep 3
+        done
+        echo "Server did not start in time."
+        exit 1
+      shell: bash
+
+    - name: Test server response
+      run: |
+        RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8000)
+        if [ "$RESPONSE" -eq 200 ]; then
+          echo "Server responded with HTTP 200 OK."
+        else
+          echo "Server did not respond with HTTP 200. Response code: $RESPONSE"
+          exit 1
+        fi
+      shell: bash
+
+    - name: Kill MetaCall process (free port 8000)
+      run: |
+        if [ -f metacall_pid.txt ]; then
+          PID=$(cat metacall_pid.txt)
+          echo "Killing process with PID $PID"
+          kill $PID
+          rm metacall_pid.txt  # Remove the PID file after killing the process
+        else
+          echo "PID file not found. No process to kill."
+        fi
+      shell: bash
+
+  docker:
     runs-on: ubuntu-latest
     steps:
     - name: Checkout Code
