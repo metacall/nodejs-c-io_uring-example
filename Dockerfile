@@ -39,20 +39,10 @@ WORKDIR /root
 
 # Clone and build the project
 RUN git clone --branch v0.8.7 https://github.com/metacall/core \
-	&& ./core/tools/metacall-environment.sh release base nodejs c \
 	&& mkdir core/build && cd core/build \
-	&& cmake \
-		-DOPTION_BUILD_LOADERS_C=On \
-		-DOPTION_BUILD_LOADERS_NODE=On \
-		-DOPTION_BUILD_PORTS=On \
-		-DOPTION_BUILD_PORTS_NODE=On \
-		-DOPTION_BUILD_DETOURS=Off \
-		-DOPTION_BUILD_SCRIPTS=Off \
-		-DOPTION_BUILD_TESTS=Off \
-		-DOPTION_BUILD_EXAMPLES=Off \
-		.. \
-	&& cmake --build . --target install \
-	&& ldconfig /usr/local/lib \
+	&& ../tools/metacall-environment.sh release base nodejs c \
+	&& ../tools/metacall-configure.sh release nodejs c ports install \
+	&& ../tools/metacall-build.sh release nodejs c ports install \
 	&& cd ../.. \
 	&& rm -rf core
 
@@ -67,7 +57,7 @@ ENV LOADER_LIBRARY_PATH=/usr/local/lib \
 
 EXPOSE 8000
 
-HEALTHCHECK --interval=10s --timeout=3s \
-	CMD wget --no-verbose --tries=1 --spider http://localhost:8000/ || exit 1
+HEALTHCHECK --interval=1s --timeout=3s --start-period=1ms \
+	CMD curl localhost:8000 || exit 1
 
 CMD [ "metacallcli", "/root/index.js" ]

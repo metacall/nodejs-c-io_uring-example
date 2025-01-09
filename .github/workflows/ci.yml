@@ -14,22 +14,18 @@ jobs:
     steps:
     - name: Checkout Code
       uses: actions/checkout@v4
+
     - name: Test Docker Build
       run: |
         docker build -t metacall/nodejs-c-liburing-example .
-        docker run --rm -p 8000:8000 --name metacall_test -d metacall/nodejs-c-liburing-example
+        docker run -p 8000:8000 --name metacall_test -d metacall/nodejs-c-liburing-example
 
-# TODO: This works on my pc.. but it seems not to work in the CI
-# RETRIES=0
-# while true; do
-#     HTTP_CODE="$(wget --server-response -q "http://localhost:8000" 2>&1 | grep "HTTP/" | awk '{print $2}')"
-#     if [[ "$HTTP_CODE" -eq "200" ]]; then
-#         echo "Service is ready (HTTP 200)."
-#         exit 0
-#     elif [[ "$RETRIES" -ge "20" ]]; then
-#         echo "Max retries reached. Service not ready."
-#         exit 1
-#     fi
-#     RETRIES=$((RETRIES + 1))
-#     sleep 5
-# done
+    - name: Wait for Readiness
+      run: |
+        until [ "`docker inspect -f {{.State.Health.Status}} metacall_test`" == "healthy" ]; do
+            sleep 1
+        done
+
+    - name: Test
+      run: |
+        curl localhost:8000 || exit 1
