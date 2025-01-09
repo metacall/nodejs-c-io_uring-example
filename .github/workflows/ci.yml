@@ -22,7 +22,20 @@ jobs:
         # docker run -p 8000:8000 --name metacall_test -d metacall/nodejs-c-liburing-example
         docker run --network host --name metacall_test -d metacall/nodejs-c-liburing-example
         docker ps
+        docker ps
+        docker ps
+        docker ps
+        docker ps
+        docker ps
+        docker ps
+        docker ps
         sleep 10
+        docker ps
+        docker ps
+        docker ps
+        docker ps
+        docker ps
+        docker ps
         docker ps
         docker logs metacall_test
         curl localhost:8000 || exit 1
