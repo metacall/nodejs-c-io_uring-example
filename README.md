@@ -30,7 +30,7 @@ sum(3, 4) # 7
 
 We will be avoiding all the boilerplate and we will have a single interface for all languages. The calls will be also type safe and we will avoid a lot of errors and time for maintaining the wrappers for each language that we can spend focusing on the development.
 
-In this example we want to bring the power of `io_uring` to NodeJS for maximizing the speed of I/O and outperform NodeJS native primitives like `http` module. For demonstrating it, we have a `server_listen` function which creates a simple HTTP server in the port `28977`.
+In this example we want to bring the power of `io_uring` to NodeJS for maximizing the speed of I/O and outperform NodeJS native primitives like `http` module. For demonstrating it, we have a `server_listen` function which creates a simple HTTP server in the port `8000`.
 
 ## Docker
 
@@ -38,9 +38,9 @@ Building and running with Docker:
 
 ```bash
 docker build -t metacall/nodejs-c-liburing-example .
-docker run --rm -p 28977:28977 -it metacall/nodejs-c-liburing-example
+docker run --rm -p 8000:8000 -it metacall/nodejs-c-liburing-example
 ```
 
 ## Accessing to the website
 
-Just go to your web browser and enter this url: `localhost:28977`
+Just go to your web browser and enter this url: `localhost:8000`

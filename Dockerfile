@@ -55,9 +55,9 @@ COPY scripts/uring.c scripts/script.ld /home/scripts/
 ENV LOADER_LIBRARY_PATH=/usr/local/lib \
 	LOADER_SCRIPT_PATH=/home/scripts
 
-EXPOSE 28977
+EXPOSE 8000
 
 # HEALTHCHECK --interval=1s --timeout=3s --start-period=1ms \
-# 	CMD curl localhost:28977 || exit 1
+# 	CMD curl localhost:8000 || exit 1
 
 CMD [ "metacallcli", "/root/index.js" ]

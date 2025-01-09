@@ -22,4 +22,4 @@ const { metacall, metacall_load_from_file } = require('metacall');
 
 metacall_load_from_file('c', ['uring.c', 'script.ld']);
 
-metacall('server_listen', 28977);
+metacall('server_listen', 8000);
