@@ -1,18 +1,24 @@
 name: CI
 
 on:
-  pull_request:
   push:
     branches:
       - master
+      - tester
+      - adding_CI
+  pull_request:
+    branches:
+      - master
+      - tester
+      - adding_CI
 
 jobs:
-  linux:
+  Linux_test:
     runs-on: ubuntu-latest
 
     steps:
     - name: Checkout Code
-      uses: actions/checkout@v4
+      uses: actions/checkout@v3
 
     - name: Set up Dependencies
       run: |
@@ -29,16 +35,26 @@ jobs:
         git clone --branch v0.8.7 https://github.com/metacall/core
         cd core
         ./tools/metacall-environment.sh release base nodejs c
-        mkdir build && cd build
-        ../tools/metacall-configure.sh release nodejs c ports install
-        ../tools/metacall-build.sh release nodejs c ports install
+        sudo mkdir build && cd build
+        sudo cmake \
+          -DOPTION_BUILD_LOADERS_C=On \
+          -DOPTION_BUILD_LOADERS_NODE=On \
+          -DOPTION_BUILD_PORTS=On \
+          -DOPTION_BUILD_PORTS_NODE=On \
+          -DOPTION_BUILD_DETOURS=Off \
+          -DOPTION_BUILD_SCRIPTS=Off \
+          -DOPTION_BUILD_TESTS=Off \
+          -DOPTION_BUILD_EXAMPLES=Off \
+          ..
+        sudo cmake --build . --target install
+        sudo ldconfig /usr/local/lib
         cd ../..
-        rm -rf core
-
+        sudo rm -rf core
+        
     - name: Set path & Run MetaCall Example
       run: |
         export LOADER_LIBRARY_PATH="/usr/local/lib"
-        export LOADER_SCRIPT_PATH="$(pwd)/scripts" # path of the scripts
+        export LOADER_SCRIPT_PATH="/home/runner/work/nodejs-c-io_uring-example/nodejs-c-io_uring-example/scripts" # path of the scripts
         nohup metacallcli index.js & # running the server in the background
         echo $! > metacall_pid.txt  # Save the PID of the process to a file
         
@@ -54,6 +70,7 @@ jobs:
         done
         echo "Server did not start in time."
         exit 1
+      shell: bash
 
     - name: Test server response
       run: |
@@ -64,6 +81,7 @@ jobs:
           echo "Server did not respond with HTTP 200. Response code: $RESPONSE"
           exit 1
         fi
+      shell: bash
 
     - name: Kill MetaCall process (free port 8000)
       run: |
@@ -75,6 +93,7 @@ jobs:
         else
           echo "PID file not found. No process to kill."
         fi
+      shell: bash
 
   docker:
     runs-on: ubuntu-latest
