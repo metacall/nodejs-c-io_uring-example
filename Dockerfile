@@ -57,7 +57,7 @@ ENV LOADER_LIBRARY_PATH=/usr/local/lib \
 
 EXPOSE 8000
 
-HEALTHCHECK --interval=1s --timeout=3s --start-period=1ms \
-	CMD curl localhost:8000 || exit 1
+# HEALTHCHECK --interval=1s --timeout=3s --start-period=1ms \
+# 	CMD curl localhost:8000 || exit 1
 
 CMD [ "metacallcli", "/root/index.js" ]
