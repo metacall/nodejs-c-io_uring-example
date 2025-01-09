@@ -4,11 +4,11 @@ on:
   push:
     branches:
       - master
-      - Debug_CI
+      - DebugCI
   pull_request:
     branches:
       - master
-      - Debug_CI
+      - DebugCI
 
 jobs:
   Linux_test:
