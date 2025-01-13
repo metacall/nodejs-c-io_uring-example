@@ -436,12 +436,24 @@ void sigint_handler(int signo) {
 	exit(0);
 }
 
+void debug_print(const char *msg) {
+	printf("[DEBUG] %s\n", msg);
+	fflush(stdout);
+}
+
 int server_listen(int port) {
+	debug_print("Start listening");
 	int server_socket = setup_listening_socket(port);
 
+	debug_print("Set sigint signal handler");
 	signal(SIGINT, sigint_handler);
+
+	debug_print("Start queue init");
 	io_uring_queue_init(QUEUE_DEPTH, &ring, 0);
+
+	debug_print("Start server loop");
 	server_loop(server_socket);
 
+	debug_print("Exit server loop");
 	return 0;
 }
