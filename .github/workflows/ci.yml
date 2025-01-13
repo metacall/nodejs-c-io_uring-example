@@ -86,7 +86,7 @@ jobs:
     - name: Test Docker Build
       run: |
         docker build -t metacall/nodejs-c-liburing-example .
-        docker run --network host --name metacall_test -d metacall/nodejs-c-liburing-example
+        docker run -p 8000:8000 --name metacall_test -d metacall/nodejs-c-liburing-example
 
     - name: Get docker logs
       run: |
