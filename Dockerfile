@@ -17,7 +17,7 @@
 #	limitations under the License.
 #
 
-FROM debian:trixie-slim
+FROM ubuntu:24.04
 
 # Image descriptor
 LABEL copyright.name="Vicente Eduardo Ferrer Garcia" \
