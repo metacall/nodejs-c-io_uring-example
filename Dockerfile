@@ -60,4 +60,4 @@ EXPOSE 8000
 HEALTHCHECK --interval=1s --timeout=3s --start-period=1ms \
 	CMD curl localhost:8000 || exit 1
 
-CMD [ "metacallclid", "/root/index.js" ]
+CMD [ "metacallcli", "/root/index.js" ]
