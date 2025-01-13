@@ -1,33 +1,117 @@
-
-name: CI Linux Build and Test
+name: CI
 
 on:
-  workflow_dispatch:
   pull_request:
   push:
     branches:
       - master
 
 jobs:
-  test:
+  linux:
+    runs-on: ubuntu-24.04
+
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v4
+
+    - name: Set up Dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y --no-install-recommends \
+          ca-certificates \
+          git \
+          liburing-dev \
+          cmake \
+          curl
+
+    - name: Clone and Build MetaCall
+      run: |
+        git clone --branch v0.8.7 https://github.com/metacall/core
+        cd core
+        ./tools/metacall-environment.sh release base nodejs c
+        mkdir build && cd build
+        ../tools/metacall-configure.sh release nodejs c ports install
+        ../tools/metacall-build.sh release nodejs c ports install
+        cd ../..
+        rm -rf core
+
+    - name: Set path & Run MetaCall Example
+      run: |
+        export LOADER_LIBRARY_PATH="/usr/local/lib"
+        export LOADER_SCRIPT_PATH="$(pwd)/scripts" # path of the scripts
+        nohup metacallcli index.js & # running the server in the background
+        echo $! > metacall_pid.txt  # Save the PID of the process to a file
+        
+    - name: Wait for server to be ready
+      run: |
+        for i in {1..10}; do
+          if curl -s http://localhost:8000 > /dev/null; then
+            echo "Server is up!"
+            exit 0
+          fi
+          echo "Waiting for server..."
+          sleep 3
+        done
+        echo "Server did not start in time."
+        exit 1
+
+    - name: Test server response
+      run: |
+        RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8000)
+        if [ "$RESPONSE" -eq 200 ]; then
+          echo "Server responded with HTTP 200 OK."
+        else
+          echo "Server did not respond with HTTP 200. Response code: $RESPONSE"
+          exit 1
+        fi
+
+    - name: Kill MetaCall process (free port 8000)
+      run: |
+        if [ -f metacall_pid.txt ]; then
+          PID=$(cat metacall_pid.txt)
+          echo "Killing process with PID $PID"
+          kill $PID
+          rm metacall_pid.txt  # Remove the PID file after killing the process
+        else
+          echo "PID file not found. No process to kill."
+        fi
+
+  docker:
     runs-on: ubuntu-latest
+
     steps:
     - name: Checkout Code
       uses: actions/checkout@v4
 
     - name: Test Docker Build
       run: |
-        set -x
         docker build -t metacall/nodejs-c-liburing-example .
         docker run -p 8000:8000 --name metacall_test -d metacall/nodejs-c-liburing-example
-        docker ps
+
+    - name: Get docker logs
+      run: |
         sleep 10
-        docker ps
         docker logs metacall_test
-        docker inspect metacall_test --format='{{.State.ExitCode}}'
-        curl localhost:8000 || exit 1
 
+    - name: Wait for server to be ready
+      run: |
+        for i in {1..10}; do
+          if curl -s http://localhost:8000 > /dev/null; then
+            echo "Server is up!"
+            exit 0
+          fi
+          echo "Waiting for server..."
+          sleep 3
+        done
+        echo "Server did not start in time."
+        exit 1
 
-# until [ "`docker inspect -f {{.State.Health.Status}} metacall_test`" == "healthy" ]; do
-#     sleep 1
-# done
+    - name: Test server response
+      run: |
+        RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8000)
+        if [ "$RESPONSE" -eq 200 ]; then
+          echo "Server responded with HTTP 200 OK."
+        else
+          echo "Server did not respond with HTTP 200. Response code: $RESPONSE"
+          exit 1
+        fi
