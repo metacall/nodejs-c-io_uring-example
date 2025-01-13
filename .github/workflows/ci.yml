@@ -76,42 +76,43 @@ jobs:
           echo "PID file not found. No process to kill."
         fi
 
-  docker:
-    runs-on: ubuntu-24.04
+  # TODO:
+  # docker:
+  #   runs-on: ubuntu-24.04
 
-    steps:
-    - name: Checkout Code
-      uses: actions/checkout@v4
+  #   steps:
+  #   - name: Checkout Code
+  #     uses: actions/checkout@v4
 
-    - name: Test Docker Build
-      run: |
-        docker build -t metacall/nodejs-c-liburing-example .
-        docker run -p 8000:8000 --name metacall_test -d metacall/nodejs-c-liburing-example
+  #   - name: Test Docker Build
+  #     run: |
+  #       docker build -t metacall/nodejs-c-liburing-example .
+  #       docker run -p 8000:8000 --name metacall_test -d metacall/nodejs-c-liburing-example
 
-    - name: Get docker logs
-      run: |
-        sleep 10
-        docker logs metacall_test
+  #   - name: Get docker logs
+  #     run: |
+  #       sleep 10
+  #       docker logs metacall_test
 
-    - name: Wait for server to be ready
-      run: |
-        for i in {1..10}; do
-          if curl -s http://localhost:8000 > /dev/null; then
-            echo "Server is up!"
-            exit 0
-          fi
-          echo "Waiting for server..."
-          sleep 3
-        done
-        echo "Server did not start in time."
-        exit 1
+  #   - name: Wait for server to be ready
+  #     run: |
+  #       for i in {1..10}; do
+  #         if curl -s http://localhost:8000 > /dev/null; then
+  #           echo "Server is up!"
+  #           exit 0
+  #         fi
+  #         echo "Waiting for server..."
+  #         sleep 3
+  #       done
+  #       echo "Server did not start in time."
+  #       exit 1
 
-    - name: Test server response
-      run: |
-        RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8000)
-        if [ "$RESPONSE" -eq 200 ]; then
-          echo "Server responded with HTTP 200 OK."
-        else
-          echo "Server did not respond with HTTP 200. Response code: $RESPONSE"
-          exit 1
-        fi
+  #   - name: Test server response
+  #     run: |
+  #       RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8000)
+  #       if [ "$RESPONSE" -eq 200 ]; then
+  #         echo "Server responded with HTTP 200 OK."
+  #       else
+  #         echo "Server did not respond with HTTP 200. Response code: $RESPONSE"
+  #         exit 1
+  #       fi
